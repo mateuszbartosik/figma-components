@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Component Docs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --bg-hover: #ebebeb;
+      --border: #e6e6e6;
+      --text: #1a1a1a;
+      --text-secondary: #6e6e6e;
+      --text-tertiary: #aaaaaa;
+      --accent: #0066ff;
+      --accent-hover: #0052cc;
+      --accent-light: #e8f0ff;
+      --success-bg: #e8f9f0;
+      --success: #1a9e5c;
+      --radius: 8px;
+      --radius-sm: 5px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      font-size: 12px;
+      color: var(--text);
+      background: var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 13px; font-weight: 600; }
+    .header p  { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ── Views ── */
+    .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .view.active { display: flex; }
+
+    /* ── Empty state ── */
+    .empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 32px;
+      text-align: center;
+    }
+    .empty-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--bg-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .empty h2 { font-size: 13px; font-weight: 600; }
+    .empty p  { font-size: 11px; color: var(--text-secondary); line-height: 1.6; max-width: 220px; }
+
+    /* ── Component card ── */
+    .comp-card {
+      margin: 14px 16px 0;
+      padding: 12px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .comp-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      background: var(--accent-light);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .comp-icon svg { color: var(--accent); }
+    .comp-info { flex: 1; min-width: 0; }
+    .comp-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .comp-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+    .badge {
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px; border-radius: 10px;
+      background: var(--accent-light); color: var(--accent);
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── Options ── */
+    .options {
+      padding: 16px 16px 8px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .options-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .option-item:hover { background: var(--bg-secondary); }
+    .option-item input[type="checkbox"] {
+      width: 14px; height: 14px; margin-top: 1px;
+      accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+    }
+    .option-text {}
+    .option-title { font-size: 12px; font-weight: 500; }
+    .option-desc  { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+
+    .option-item.disabled { opacity: 0.4; pointer-events: none; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .btn {
+      width: 100%; padding: 9px;
+      border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none;
+      font-family: inherit;
+      transition: background 0.1s, opacity 0.1s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+    /* ── Success ── */
+    .success {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 32px;
+      text-align: center;
+    }
+    .success-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--success-bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .success h2 { font-size: 14px; font-weight: 600; }
+    .success p  { font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+    .success .btn-primary { width: auto; padding: 8px 20px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<!-- Empty state -->
+<div class="view active" id="view-empty">
+  <div class="header">
+    <h1>Component Docs</h1>
+    <p>Generates a documentation frame from your component's properties and variants</p>
+  </div>
+  <div class="empty">
+    <div class="empty-icon">◆</div>
+    <h2>No component selected</h2>
+    <p>Select a <strong>Component</strong> or <strong>Component Set</strong> on the canvas to get started.</p>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="view" id="view-main">
+  <div class="header">
+    <h1>Component Docs</h1>
+    <p>Generates a documentation frame from your component's properties and variants</p>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1.5L14.5 5.25V10.75L8 14.5L1.5 10.75V5.25L8 1.5Z" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="8" cy="8" r="1.8" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="comp-info">
+      <div class="comp-name" id="comp-name">Component</div>
+      <div class="comp-meta" id="comp-meta">—</div>
+    </div>
+    <span class="badge" id="comp-badge">Component</span>
+  </div>
+
+  <div class="options">
+    <div class="options-label">Include in documentation</div>
+
+    <label class="option-item">
+      <input type="checkbox" id="opt-props" checked />
+      <div class="option-text">
+        <div class="option-title">Properties table</div>
+        <div class="option-desc">Lists all component properties with their types and possible values.</div>
+      </div>
+    </label>
+
+    <label class="option-item" id="opt-variants-item">
+      <input type="checkbox" id="opt-variants" checked />
+      <div class="option-text">
+        <div class="option-title">Variant previews</div>
+        <div class="option-desc">Shows live instances of each variant directly in the doc frame.</div>
+      </div>
+    </label>
+
+    <label class="option-item">
+      <input type="checkbox" id="opt-notes" checked />
+      <div class="option-text">
+        <div class="option-title">Description placeholder</div>
+        <div class="option-desc">Adds an editable description field at the top of the document.</div>
+      </div>
+    </label>
+  </div>
+
+  <div class="footer">
+    <button class="btn btn-primary" id="btn-generate">Generate Documentation</button>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="view" id="view-success">
+  <div class="header">
+    <h1>Component Docs</h1>
+    <p>Generates a documentation frame from your component's properties and variants</p>
+  </div>
+  <div class="success">
+    <div class="success-icon">✦</div>
+    <h2>Documentation generated!</h2>
+    <p id="success-desc">The doc frame has been placed on your canvas.</p>
+    <button class="btn btn-primary" id="btn-done">Close</button>
+  </div>
+</div>
+
+<script>
+  let currentNodeId = null;
+  let isSet = false;
+
+  const viewEmpty   = document.getElementById('view-empty');
+  const viewMain    = document.getElementById('view-main');
+  const viewSuccess = document.getElementById('view-success');
+
+  function show(id) {
+    [viewEmpty, viewMain, viewSuccess].forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  document.getElementById('btn-generate').addEventListener('click', () => {
+    if (!currentNodeId) return;
+    const btn = document.getElementById('btn-generate');
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    parent.postMessage({
+      pluginMessage: {
+        type: 'generate',
+        nodeId: currentNodeId,
+        options: {
+          includeProps:    document.getElementById('opt-props').checked,
+          includeVariants: document.getElementById('opt-variants').checked,
+          includeNotes:    document.getElementById('opt-notes').checked,
+        },
+      }
+    }, '*');
+  });
+
+  document.getElementById('btn-done').addEventListener('click', () => {
+    parent.postMessage({ pluginMessage: { type: 'close' } }, '*');
+  });
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+
+    if (msg.type === 'no-selection') {
+      currentNodeId = null;
+      show('view-empty');
+      return;
+    }
+
+    if (msg.type === 'context') {
+      const { info } = msg;
+      currentNodeId = info.id;
+      isSet = info.type === 'COMPONENT_SET';
+
+      document.getElementById('comp-name').textContent = info.name;
+      document.getElementById('comp-badge').textContent = isSet ? 'Component Set' : 'Component';
+
+      const parts = [];
+      if (info.propCount > 0) parts.push(`${info.propCount} ${info.propCount === 1 ? 'property' : 'properties'}`);
+      if (isSet && info.variantCount > 0) parts.push(`${info.variantCount} variants`);
+      document.getElementById('comp-meta').textContent = parts.length ? parts.join('  ·  ') : 'No properties';
+
+      const variantsItem  = document.getElementById('opt-variants-item');
+      const variantsCheck = document.getElementById('opt-variants');
+      if (!isSet) {
+        variantsItem.classList.add('disabled');
+        variantsCheck.checked = false;
+      } else {
+        variantsItem.classList.remove('disabled');
+        variantsCheck.checked = true;
+      }
+
+      const btn = document.getElementById('btn-generate');
+      btn.disabled = false;
+      btn.textContent = 'Generate Documentation';
+
+      show('view-main');
+      return;
+    }
+
+    if (msg.type === 'done') {
+      const parts = [];
+      if (msg.propCount > 0) parts.push(`${msg.propCount} ${msg.propCount === 1 ? 'property' : 'properties'}`);
+      if (msg.variantCount > 0) parts.push(`${msg.variantCount} variants`);
+      document.getElementById('success-desc').textContent =
+        `Documented ${parts.join(' and ')} — the frame is ready on your canvas.`;
+      show('view-success');
+      return;
+    }
+
+    if (msg.type === 'error') {
+      const btn = document.getElementById('btn-generate');
+      btn.disabled = false;
+      btn.textContent = 'Generate Documentation';
+      return;
+    }
+  };
+
+  parent.postMessage({ pluginMessage: { type: 'init' } }, '*');
+</script>
+</body>
+</html>

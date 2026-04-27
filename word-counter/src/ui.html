@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Word Counter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:            #0e0d0b;
+      --bg-raise:      #161412;
+      --bg-hover:      #211f1b;
+      --border:        #2c2824;
+      --border-subtle: #201e1b;
+      --text:          #ede6d9;
+      --text-dim:      #8a8275;
+      --text-faint:    #57534d;
+      --accent:        #c07a48;
+      --accent-dim:    #1f1208;
+      --radius:        6px;
+      --radius-sm:     4px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      font-size: 12px;
+      color: var(--text);
+      background: var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .header {
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .header-name {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .header-tagline {
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Scope toggle ────────────────────────────────────── */
+    .scope-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .scope-btn {
+      flex: 1;
+      padding: 9px 0;
+      border: none;
+      background: transparent;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      cursor: pointer;
+      font-family: inherit;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .scope-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+    .scope-btn:not(.active):hover { color: var(--text-dim); }
+
+    /* ── Scrollable body ─────────────────────────────────── */
+    .body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    .empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 40px 28px;
+      text-align: center;
+    }
+    .empty-glyph {
+      font-size: 32px;
+      color: var(--text-faint);
+      line-height: 1;
+      margin-bottom: 8px;
+      letter-spacing: -0.04em;
+    }
+    .empty h2 {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+    }
+    .empty p {
+      font-size: 11px;
+      color: var(--text-faint);
+      line-height: 1.7;
+      max-width: 210px;
+    }
+
+    /* ── Stats ───────────────────────────────────────────── */
+    .stats-wrap {
+      padding: 22px 18px 0;
+    }
+
+    .primary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+    .primary-stat {
+      background: var(--bg-raise);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 16px 14px;
+    }
+
+    .stat-num {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+      color: var(--text);
+    }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-top: 6px;
+    }
+
+    .secondary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .secondary-stat {
+      background: var(--bg-raise);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px 10px;
+    }
+
+    .stat-num.sm { font-size: 22px; letter-spacing: -0.5px; }
+    .stat-num.accent { color: var(--accent); }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0 0;
+    }
+
+    /* ── Accordion ───────────────────────────────────────── */
+    .accordion {
+      flex-shrink: 0;
+    }
+
+    .accordion-trigger {
+      width: 100%;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-family: inherit;
+      transition: color 0.12s;
+    }
+    .accordion-trigger:hover { color: var(--text); }
+
+    .accordion-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .accordion-count {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-faint);
+      letter-spacing: 0.04em;
+    }
+    .accordion-chevron {
+      width: 7px;
+      height: 7px;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.22s ease;
+      flex-shrink: 0;
+    }
+    .accordion-chevron.open { transform: rotate(225deg); }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.28s ease;
+    }
+
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 18px 4px;
+    }
+
+    .layer-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .layer-item:hover {
+      background: var(--bg-hover);
+      border-color: var(--border);
+    }
+    .layer-item:active { background: #2a2620; }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .layer-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .layer-badges {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .badge-chars {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .layer-preview {
+      font-size: 11px;
+      color: var(--text-faint);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Load more ───────────────────────────────────────── */
+    .load-more-wrap {
+      padding: 6px 18px 18px;
+    }
+    .load-more-btn {
+      width: 100%;
+      padding: 8px 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+    }
+    .load-more-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+      border-color: var(--text-faint);
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-name">Word Counter</span>
+  <span class="header-tagline">characters · words · time</span>
+</div>
+
+<div class="scope-bar">
+  <button class="scope-btn active" data-scope="selection">Selection</button>
+  <button class="scope-btn"        data-scope="page">Page</button>
+</div>
+
+<div class="body" id="body">
+
+  <!-- Empty state -->
+  <div class="empty" id="view-empty">
+    <div class="empty-glyph">¶</div>
+    <h2 id="empty-title">Nothing to count</h2>
+    <p id="empty-desc">Select layers with text, or switch to Page to scan the whole canvas.</p>
+  </div>
+
+  <!-- Stats -->
+  <div id="view-stats" style="display:none">
+    <div class="stats-wrap">
+      <div class="primary-stats">
+        <div class="primary-stat">
+          <div class="stat-num" id="stat-chars">0</div>
+          <div class="stat-label">Characters</div>
+        </div>
+        <div class="primary-stat">
+          <div class="stat-num" id="stat-words">0</div>
+          <div class="stat-label">Words</div>
+        </div>
+      </div>
+
+      <div class="secondary-stats" style="margin-top:8px">
+        <div class="secondary-stat">
+          <div class="stat-num sm" id="stat-chars-ns">0</div>
+          <div class="stat-label">Chars w/o spaces</div>
+        </div>
+        <div class="secondary-stat">
+          <div class="stat-num sm" id="stat-paragraphs">0</div>
+          <div class="stat-label">Paragraphs</div>
+        </div>
+        <div class="secondary-stat">
+          <div class="stat-num sm accent" id="stat-reading">—</div>
+          <div class="stat-label">Reading time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Accordion -->
+    <div class="accordion">
+      <button class="accordion-trigger" id="accordion-trigger">
+        <div class="accordion-left">
+          Text layers
+          <span class="accordion-count" id="layers-count"></span>
+        </div>
+        <span class="accordion-chevron" id="accordion-chevron"></span>
+      </button>
+      <div class="accordion-body" id="accordion-body">
+        <div class="layer-list" id="layer-list"></div>
+        <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+          <button class="load-more-btn" id="load-more-btn">Load more</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const INITIAL_COUNT = 5;
+  const LOAD_STEP     = 10;
+
+  let allLayers    = [];
+  let visibleCount = INITIAL_COUNT;
+  let isOpen       = false;
+
+  const scopeBtns       = document.querySelectorAll('.scope-btn');
+  const viewEmpty       = document.getElementById('view-empty');
+  const viewStats       = document.getElementById('view-stats');
+  const emptyTitle      = document.getElementById('empty-title');
+  const emptyDesc       = document.getElementById('empty-desc');
+  const elChars         = document.getElementById('stat-chars');
+  const elWords         = document.getElementById('stat-words');
+  const elCharsNS       = document.getElementById('stat-chars-ns');
+  const elParas         = document.getElementById('stat-paragraphs');
+  const elReading       = document.getElementById('stat-reading');
+  const elLayerCount    = document.getElementById('layers-count');
+  const elLayerList     = document.getElementById('layer-list');
+  const elLoadMoreWrap  = document.getElementById('load-more-wrap');
+  const elLoadMoreBtn   = document.getElementById('load-more-btn');
+  const accordionTrigger= document.getElementById('accordion-trigger');
+  const accordionBody   = document.getElementById('accordion-body');
+  const accordionChevron= document.getElementById('accordion-chevron');
+
+  function fmt(n) { return n.toLocaleString(); }
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function syncAccordionHeight() {
+    if (isOpen) accordionBody.style.maxHeight = accordionBody.scrollHeight + 'px';
+  }
+
+  function renderLayerList() {
+    const shown     = allLayers.slice(0, visibleCount);
+    const remaining = allLayers.length - visibleCount;
+
+    elLayerList.innerHTML = shown.map(l => `
+      <div class="layer-item" data-id="${esc(l.id)}">
+        <div class="layer-row">
+          <span class="layer-name">${esc(l.name)}</span>
+          <div class="layer-badges">
+            <span class="badge-chars">${fmt(l.chars)} chars</span>
+          </div>
+        </div>
+        ${l.preview ? `<div class="layer-preview">${esc(l.preview)}</div>` : ''}
+      </div>
+    `).join('');
+
+    if (remaining > 0) {
+      elLoadMoreWrap.style.display = 'block';
+      const next = Math.min(LOAD_STEP, remaining);
+      elLoadMoreBtn.textContent = `Load ${next} more`;
+    } else {
+      elLoadMoreWrap.style.display = 'none';
+    }
+
+    syncAccordionHeight();
+  }
+
+  function render(result, scope) {
+    if (result.isEmpty) {
+      viewStats.style.display = 'none';
+      viewEmpty.style.display = 'flex';
+      emptyTitle.textContent = scope === 'selection' ? 'Nothing to count' : 'No text on page';
+      emptyDesc.textContent  = scope === 'selection'
+        ? 'Select layers with text, or switch to Page to scan the whole canvas.'
+        : 'Add some text layers to the canvas and try again.';
+      return;
+    }
+
+    viewEmpty.style.display = 'none';
+    viewStats.style.display = 'block';
+
+    const s = result.stats;
+    elChars.textContent   = fmt(s.chars);
+    elWords.textContent   = fmt(s.words);
+    elCharsNS.textContent = fmt(s.charsNoSpaces);
+    elParas.textContent   = fmt(s.paragraphs);
+    elReading.textContent = s.readingTime;
+
+    allLayers = [...result.layers].sort((a, b) => b.chars - a.chars);
+
+    const n = result.layerCount;
+    elLayerCount.textContent = `${n} layer${n === 1 ? '' : 's'}`;
+
+    renderLayerList();
+  }
+
+  // Accordion toggle
+  accordionTrigger.addEventListener('click', () => {
+    isOpen = !isOpen;
+    accordionChevron.classList.toggle('open', isOpen);
+    if (isOpen) {
+      accordionBody.style.maxHeight = accordionBody.scrollHeight + 'px';
+    } else {
+      accordionBody.style.maxHeight = '0';
+    }
+  });
+
+  // Load more
+  elLoadMoreBtn.addEventListener('click', () => {
+    visibleCount += LOAD_STEP;
+    renderLayerList();
+  });
+
+  // Layer click → select in Figma
+  elLayerList.addEventListener('click', (e) => {
+    const item = e.target.closest('.layer-item');
+    if (item && item.dataset.id) {
+      parent.postMessage({ pluginMessage: { type: 'selectLayer', nodeId: item.dataset.id } }, '*');
+    }
+  });
+
+  // Scope toggle
+  scopeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      scopeBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      visibleCount = INITIAL_COUNT;
+      parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, '*');
+    });
+  });
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+    if (msg.type === 'stats') render(msg.result, msg.scope);
+  };
+
+  parent.postMessage({ pluginMessage: { type: 'init' } }, '*');
+</script>
+</body>
+</html>

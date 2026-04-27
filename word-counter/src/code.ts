@@ -1,0 +1,122 @@
+figma.showUI(__html__, { width: 380, height: 520, title: 'Word Counter' });
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface LayerInfo {
+  id: string;
+  name: string;
+  preview: string;
+  words: number;
+  chars: number;
+}
+
+interface Stats {
+  words: number;
+  chars: number;
+  charsNoSpaces: number;
+  paragraphs: number;
+  readingTime: string;
+}
+
+interface ScanResult {
+  stats: Stats;
+  layers: LayerInfo[];
+  layerCount: number;
+  isEmpty: boolean;
+}
+
+type Scope = 'selection' | 'page';
+
+// ─── Text collection ──────────────────────────────────────────────────────────
+
+function collectTextNodes(node: SceneNode): TextNode[] {
+  if (node.type === 'TEXT') return [node];
+  if ('children' in node) {
+    return [...(node as ChildrenMixin).children].flatMap(c => collectTextNodes(c as SceneNode));
+  }
+  return [];
+}
+
+// ─── Statistics ───────────────────────────────────────────────────────────────
+
+function readingTime(words: number): string {
+  if (words === 0) return '—';
+  const totalSec = Math.round((words / 200) * 60);
+  const mm = Math.floor(totalSec / 60);
+  const ss = totalSec % 60;
+  return `${mm}:${String(ss).padStart(2, '0')}`;
+}
+
+function computeStats(text: string): Stats {
+  const trimmed = text.trim();
+
+  if (!trimmed) {
+    return { words: 0, chars: 0, charsNoSpaces: 0, paragraphs: 0, readingTime: '—' };
+  }
+
+  const words         = trimmed.split(/\s+/).length;
+  const chars         = text.length;
+  const charsNoSpaces = text.replace(/\s/g, '').length;
+  const paragraphs    = trimmed.split(/\n{2,}/).filter(p => p.trim().length > 0).length || 1;
+
+  return { words, chars, charsNoSpaces, paragraphs, readingTime: readingTime(words) };
+}
+
+// ─── Scan ─────────────────────────────────────────────────────────────────────
+
+function doScan(scope: Scope): ScanResult {
+  const textNodes: TextNode[] = scope === 'selection'
+    ? figma.currentPage.selection.flatMap(n => collectTextNodes(n as SceneNode))
+    : (figma.currentPage.findAll(n => n.type === 'TEXT') as TextNode[]);
+
+  if (textNodes.length === 0) {
+    return {
+      stats: { words: 0, chars: 0, charsNoSpaces: 0, paragraphs: 0, readingTime: '—' },
+      layers: [],
+      layerCount: 0,
+      isEmpty: true,
+    };
+  }
+
+  const layers: LayerInfo[] = textNodes.map(n => {
+    const text  = n.characters;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const raw   = text.replace(/\n/g, ' ').trim();
+    return {
+      id:      n.id,
+      name:    n.name || 'Text',
+      preview: raw.length > 44 ? raw.slice(0, 44) + '…' : raw,
+      words,
+      chars:   text.length,
+    };
+  });
+
+  const combined = textNodes.map(n => n.characters).join('\n\n');
+  const stats    = computeStats(combined);
+
+  return { stats, layers, layerCount: textNodes.length, isEmpty: false };
+}
+
+// ─── Messaging ────────────────────────────────────────────────────────────────
+
+let currentScope: Scope = 'selection';
+
+function push(scope: Scope) {
+  figma.ui.postMessage({ type: 'stats', result: doScan(scope), scope });
+}
+
+figma.ui.onmessage = async (msg: { type: string; scope?: Scope; nodeId?: string }) => {
+  if (msg.type === 'init')     push(currentScope);
+  if (msg.type === 'setScope') { currentScope = msg.scope!; push(currentScope); }
+  if (msg.type === 'close')    figma.closePlugin();
+
+  if (msg.type === 'selectLayer' && msg.nodeId) {
+    const node = await figma.getNodeByIdAsync(msg.nodeId);
+    if (node && node.type !== 'DOCUMENT' && node.type !== 'PAGE') {
+      figma.currentPage.selection = [node as SceneNode];
+      figma.viewport.scrollAndZoomIntoView([node as SceneNode]);
+    }
+  }
+};
+
+figma.on('selectionchange', () => push(currentScope));

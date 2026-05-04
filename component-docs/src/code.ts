@@ -38,7 +38,8 @@ function calcWidths(comp: ComponentNode | ComponentSetNode): { contentW: number;
   let maxW = MIN_CONTENT_W;
   if (comp.type === 'COMPONENT_SET') {
     for (const child of (comp as ComponentSetNode).children) {
-      if ((child as ComponentNode).width > maxW) maxW = (child as ComponentNode).width;
+      const w = (child as ComponentNode).width;
+      if (w > maxW) maxW = w;
     }
   } else {
     if (comp.width > maxW) maxW = comp.width;

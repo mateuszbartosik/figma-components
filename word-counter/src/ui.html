@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
     :root {
       --bg:            #0e0d0b;
@@ -328,9 +329,9 @@
   <span class="header-tagline">characters · words · time</span>
 </div>
 
-<div class="scope-bar">
-  <button class="scope-btn active" data-scope="selection">Selection</button>
-  <button class="scope-btn"        data-scope="page">Page</button>
+<div class="scope-bar" role="tablist">
+  <button class="scope-btn active" data-scope="selection" role="tab" aria-selected="true">Selection</button>
+  <button class="scope-btn"        data-scope="page"      role="tab" aria-selected="false">Page</button>
 </div>
 
 <div class="body" id="body">
@@ -376,7 +377,7 @@
 
     <!-- Accordion -->
     <div class="accordion">
-      <button class="accordion-trigger" id="accordion-trigger">
+      <button class="accordion-trigger" id="accordion-trigger" aria-expanded="false" aria-controls="accordion-body">
         <div class="accordion-left">
           Text layers
           <span class="accordion-count" id="layers-count"></span>
@@ -488,6 +489,7 @@
   // Accordion toggle
   accordionTrigger.addEventListener('click', () => {
     isOpen = !isOpen;
+    accordionTrigger.setAttribute('aria-expanded', String(isOpen));
     accordionChevron.classList.toggle('open', isOpen);
     if (isOpen) {
       accordionBody.style.maxHeight = accordionBody.scrollHeight + 'px';
@@ -513,8 +515,12 @@
   // Scope toggle
   scopeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      scopeBtns.forEach(b => b.classList.remove('active'));
+      scopeBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       visibleCount = INITIAL_COUNT;
       parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, '*');
     });

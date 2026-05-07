@@ -249,6 +249,10 @@
       padding: 9px 12px;
       border-radius: var(--radius-sm);
       cursor: pointer;
+      background: transparent;
+      text-align: left;
+      font-family: inherit;
+      width: 100%;
       border: 1px solid transparent;
       transition: background 0.1s, border-color 0.1s;
     }
@@ -328,9 +332,10 @@
   <span class="header-tagline">characters · words · time</span>
 </div>
 
-<div class="scope-bar" role="tablist">
+<div class="scope-bar" role="tablist" aria-label="Counting scope">
   <button class="scope-btn active" data-scope="selection" role="tab" aria-selected="true">Selection</button>
-  <button class="scope-btn"        data-scope="page" role="tab" aria-selected="false">Page</button>
+  <button class="scope-btn"        data-scope="page"      role="tab" aria-selected="false">Page</button>
+
 </div>
 
 <div class="body" id="body">
@@ -434,7 +439,7 @@
     const remaining = allLayers.length - visibleCount;
 
     elLayerList.innerHTML = shown.map(l => `
-      <div class="layer-item" data-id="${esc(l.id)}">
+      <button class="layer-item" data-id="${esc(l.id)}">
         <div class="layer-row">
           <span class="layer-name">${esc(l.name)}</span>
           <div class="layer-badges">
@@ -442,7 +447,7 @@
           </div>
         </div>
         ${l.preview ? `<div class="layer-preview">${esc(l.preview)}</div>` : ''}
-      </div>
+      </button>
     `).join('');
 
     if (remaining > 0) {
@@ -507,7 +512,7 @@
   elLayerList.addEventListener('click', (e) => {
     const item = e.target.closest('.layer-item');
     if (item && item.dataset.id) {
-      parent.postMessage({ pluginMessage: { type: 'selectLayer', nodeId: item.dataset.id } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'selectLayer', nodeId: item.dataset.id } }, 'https://www.figma.com');
     }
   });
 
@@ -521,7 +526,7 @@
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       visibleCount = INITIAL_COUNT;
-      parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, 'https://www.figma.com');
     });
   });
 
@@ -531,7 +536,7 @@
     if (msg.type === 'stats') render(msg.result, msg.scope);
   };
 
-  parent.postMessage({ pluginMessage: { type: 'init' } }, '*');
+  parent.postMessage({ pluginMessage: { type: 'init' } }, 'https://www.figma.com');
 </script>
 </body>
 </html>

@@ -511,7 +511,7 @@
   elLayerList.addEventListener('click', (e) => {
     const item = e.target.closest('.layer-item');
     if (item && item.dataset.id) {
-      parent.postMessage({ pluginMessage: { type: 'selectLayer', nodeId: item.dataset.id } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'selectLayer', nodeId: item.dataset.id } }, 'https://www.figma.com');
     }
   });
 
@@ -525,7 +525,7 @@
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       visibleCount = INITIAL_COUNT;
-      parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, 'https://www.figma.com');
     });
   });
 
@@ -535,7 +535,7 @@
     if (msg.type === 'stats') render(msg.result, msg.scope);
   };
 
-  parent.postMessage({ pluginMessage: { type: 'init' } }, '*');
+  parent.postMessage({ pluginMessage: { type: 'init' } }, 'https://www.figma.com');
 </script>
 </body>
 </html>

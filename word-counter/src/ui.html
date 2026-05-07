@@ -249,6 +249,10 @@
       padding: 9px 12px;
       border-radius: var(--radius-sm);
       cursor: pointer;
+      background: transparent;
+      text-align: left;
+      font-family: inherit;
+      width: 100%;
       border: 1px solid transparent;
       transition: background 0.1s, border-color 0.1s;
     }
@@ -328,9 +332,9 @@
   <span class="header-tagline">characters · words · time</span>
 </div>
 
-<div class="scope-bar">
-  <button class="scope-btn active" data-scope="selection">Selection</button>
-  <button class="scope-btn"        data-scope="page">Page</button>
+<div class="scope-bar" role="tablist" aria-label="Counting scope">
+  <button class="scope-btn active" data-scope="selection" role="tab" aria-selected="true">Selection</button>
+  <button class="scope-btn"        data-scope="page"      role="tab" aria-selected="false">Page</button>
 </div>
 
 <div class="body" id="body">
@@ -376,12 +380,12 @@
 
     <!-- Accordion -->
     <div class="accordion">
-      <button class="accordion-trigger" id="accordion-trigger">
+      <button class="accordion-trigger" id="accordion-trigger" aria-expanded="false" aria-controls="accordion-body">
         <div class="accordion-left">
           Text layers
           <span class="accordion-count" id="layers-count"></span>
         </div>
-        <span class="accordion-chevron" id="accordion-chevron"></span>
+        <span class="accordion-chevron" id="accordion-chevron" aria-hidden="true"></span>
       </button>
       <div class="accordion-body" id="accordion-body">
         <div class="layer-list" id="layer-list"></div>
@@ -434,7 +438,7 @@
     const remaining = allLayers.length - visibleCount;
 
     elLayerList.innerHTML = shown.map(l => `
-      <div class="layer-item" data-id="${esc(l.id)}">
+      <button class="layer-item" data-id="${esc(l.id)}">
         <div class="layer-row">
           <span class="layer-name">${esc(l.name)}</span>
           <div class="layer-badges">
@@ -442,7 +446,7 @@
           </div>
         </div>
         ${l.preview ? `<div class="layer-preview">${esc(l.preview)}</div>` : ''}
-      </div>
+      </button>
     `).join('');
 
     if (remaining > 0) {
@@ -488,6 +492,7 @@
   // Accordion toggle
   accordionTrigger.addEventListener('click', () => {
     isOpen = !isOpen;
+    accordionTrigger.setAttribute('aria-expanded', isOpen);
     accordionChevron.classList.toggle('open', isOpen);
     if (isOpen) {
       accordionBody.style.maxHeight = accordionBody.scrollHeight + 'px';
@@ -513,8 +518,12 @@
   // Scope toggle
   scopeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      scopeBtns.forEach(b => b.classList.remove('active'));
+      scopeBtns.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
       btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       visibleCount = INITIAL_COUNT;
       parent.postMessage({ pluginMessage: { type: 'setScope', scope: btn.dataset.scope } }, '*');
     });

@@ -4,7 +4,8 @@
   "description": "Figma plugin that generates documentation frames from component properties and variants",
   "scripts": {
     "build": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6",
-    "watch": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --watch"
+    "watch": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --watch",
+    "test": "node --experimental-strip-types src/utils.test.ts"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.96.0",

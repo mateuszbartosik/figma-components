@@ -67,7 +67,7 @@ function computeStats(text: string): Stats {
 function doScan(scope: Scope): ScanResult {
   const textNodes: TextNode[] = scope === 'selection'
     ? figma.currentPage.selection.flatMap(n => collectTextNodes(n as SceneNode))
-    : (figma.currentPage.findAll(n => n.type === 'TEXT') as TextNode[]);
+    : (figma.currentPage.findAllWithCriteria({ types: ['TEXT'] }) as TextNode[]);
 
   if (textNodes.length === 0) {
     return {

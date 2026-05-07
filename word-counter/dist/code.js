@@ -57,7 +57,7 @@
         return { words, chars, charsNoSpaces, paragraphs, readingTime: readingTime(words) };
       }
       function doScan(scope) {
-        const textNodes = scope === "selection" ? figma.currentPage.selection.flatMap((n) => collectTextNodes(n)) : figma.currentPage.findAll((n) => n.type === "TEXT");
+        const textNodes = scope === "selection" ? figma.currentPage.selection.flatMap((n) => collectTextNodes(n)) : figma.currentPage.findAllWithCriteria({ types: ["TEXT"] });
         if (textNodes.length === 0) {
           return {
             stats: { words: 0, chars: 0, charsNoSpaces: 0, paragraphs: 0, readingTime: "\u2014" },

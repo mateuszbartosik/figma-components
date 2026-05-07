@@ -38,7 +38,8 @@ function calcWidths(comp: ComponentNode | ComponentSetNode): { contentW: number;
   let maxW = MIN_CONTENT_W;
   if (comp.type === 'COMPONENT_SET') {
     for (const child of (comp as ComponentSetNode).children) {
-      if ((child as ComponentNode).width > maxW) maxW = (child as ComponentNode).width;
+      const w = (child as ComponentNode).width;
+      if (w > maxW) maxW = w;
     }
   } else {
     if (comp.width > maxW) maxW = comp.width;
@@ -243,13 +244,14 @@ function buildPropsTable(props: PropInfo[], contentW: number): FrameNode {
   return table;
 }
 
+const TYPE_STYLES: Record<string, { bg: string; fg: string; label: string }> = {
+  VARIANT: { bg: '#F3EEFF', fg: '#7C3AED', label: 'Variant' },
+  BOOLEAN: { bg: '#F0FDF9', fg: '#0D9488', label: 'Boolean' },
+  TEXT:    { bg: '#FFFBEB', fg: '#B45309', label: 'Text' },
+};
+
 function typeStyle(type: string) {
-  switch (type) {
-    case 'VARIANT':  return { bg: '#F3EEFF', fg: '#7C3AED', label: 'Variant' };
-    case 'BOOLEAN':  return { bg: '#F0FDF9', fg: '#0D9488', label: 'Boolean' };
-    case 'TEXT':     return { bg: '#FFFBEB', fg: '#B45309', label: 'Text' };
-    default:         return { bg: '#EFF6FF', fg: '#2563EB', label: 'Instance' };
-  }
+  return TYPE_STYLES[type] ?? { bg: '#EFF6FF', fg: '#2563EB', label: 'Instance' };
 }
 
 // ─── Variant grid ─────────────────────────────────────────────────────────────

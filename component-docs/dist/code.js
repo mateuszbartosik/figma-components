@@ -62,8 +62,9 @@
         let maxW = MIN_CONTENT_W;
         if (comp.type === "COMPONENT_SET") {
           for (const child of comp.children) {
-            if (child.width > maxW)
-              maxW = child.width;
+            const w = child.width;
+            if (w > maxW)
+              maxW = w;
           }
         } else {
           if (comp.width > maxW)
@@ -227,17 +228,14 @@
         });
         return table;
       }
+      var TYPE_STYLES = {
+        VARIANT: { bg: "#F3EEFF", fg: "#7C3AED", label: "Variant" },
+        BOOLEAN: { bg: "#F0FDF9", fg: "#0D9488", label: "Boolean" },
+        TEXT: { bg: "#FFFBEB", fg: "#B45309", label: "Text" }
+      };
       function typeStyle(type) {
-        switch (type) {
-          case "VARIANT":
-            return { bg: "#F3EEFF", fg: "#7C3AED", label: "Variant" };
-          case "BOOLEAN":
-            return { bg: "#F0FDF9", fg: "#0D9488", label: "Boolean" };
-          case "TEXT":
-            return { bg: "#FFFBEB", fg: "#B45309", label: "Text" };
-          default:
-            return { bg: "#EFF6FF", fg: "#2563EB", label: "Instance" };
-        }
+        var _a;
+        return (_a = TYPE_STYLES[type]) != null ? _a : { bg: "#EFF6FF", fg: "#2563EB", label: "Instance" };
       }
       function formatVariantName(raw) {
         return raw.split(",").map((part) => {

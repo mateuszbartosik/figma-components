@@ -1,3 +1,5 @@
+import { type Stats, readingTime, computeStats } from './utils.ts';
+
 figma.showUI(__html__, { width: 380, height: 520, title: 'Word Counter' });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -8,14 +10,6 @@ interface LayerInfo {
   preview: string;
   words: number;
   chars: number;
-}
-
-interface Stats {
-  words: number;
-  chars: number;
-  charsNoSpaces: number;
-  paragraphs: number;
-  readingTime: string;
 }
 
 interface ScanResult {
@@ -35,31 +29,6 @@ function collectTextNodes(node: SceneNode): TextNode[] {
     return [...(node as ChildrenMixin).children].flatMap(c => collectTextNodes(c as SceneNode));
   }
   return [];
-}
-
-// ─── Statistics ───────────────────────────────────────────────────────────────
-
-function readingTime(words: number): string {
-  if (words === 0) return '—';
-  const totalSec = Math.round((words / 200) * 60);
-  const mm = Math.floor(totalSec / 60);
-  const ss = totalSec % 60;
-  return `${mm}:${String(ss).padStart(2, '0')}`;
-}
-
-function computeStats(text: string): Stats {
-  const trimmed = text.trim();
-
-  if (!trimmed) {
-    return { words: 0, chars: 0, charsNoSpaces: 0, paragraphs: 0, readingTime: '—' };
-  }
-
-  const words         = trimmed.split(/\s+/).length;
-  const chars         = text.length;
-  const charsNoSpaces = text.replace(/\s/g, '').length;
-  const paragraphs    = trimmed.split(/\n{2,}/).filter(p => p.trim().length > 0).length || 1;
-
-  return { words, chars, charsNoSpaces, paragraphs, readingTime: readingTime(words) };
 }
 
 // ─── Scan ─────────────────────────────────────────────────────────────────────

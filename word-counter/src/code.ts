@@ -78,8 +78,11 @@ function doScan(scope: Scope): ScanResult {
     };
   }
 
-  const layers: LayerInfo[] = textNodes.map(n => {
+  const allCharacters: string[] = new Array(textNodes.length);
+  const layers: LayerInfo[] = textNodes.map((n, i) => {
     const text  = n.characters;
+    allCharacters[i] = text;
+
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     const raw   = text.replace(/\n/g, ' ').trim();
     return {
@@ -91,7 +94,7 @@ function doScan(scope: Scope): ScanResult {
     };
   });
 
-  const combined = textNodes.map(n => n.characters).join('\n\n');
+  const combined = allCharacters.join('\n\n');
   const stats    = computeStats(combined);
 
   return { stats, layers, layerCount: textNodes.length, isEmpty: false };

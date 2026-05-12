@@ -1,0 +1,16 @@
+<<<<<<< SEARCH
+## 2024-05-01 - Add Focus Visible Styles for Keyboard Navigation
+**Learning:** Vanilla HTML/JS Figma plugin UIs often lack default focus indicators, making keyboard accessibility poor.
+**Action:** Always explicitly add `:focus-visible` styles matching the active theme's accent color (e.g., `var(--accent)`) for all interactive elements to ensure keyboard accessibility.
+<<<<<<< HEAD
+
+## 2026-05-12 - Keyboard Nav in Vanilla HTML Plugins
+**Learning:** Vanilla HTML/JS Figma plugin UIs often completely lack default focus indicators for interactive elements (buttons, inputs, accordions), significantly hindering keyboard navigation out of the box.
+**Action:** When working on plugin UIs, always inject explicit `:focus-visible` styles matching the active theme's accent color for all interactive elements to ensure a base level of keyboard accessibility.
+=======
+>>>>>>> origin/main
+=======
+## 2024-05-01 - Add Focus Visible Styles for Keyboard Navigation
+**Learning:** Vanilla HTML/JS Figma plugin UIs often lack default focus indicators, making keyboard accessibility poor.
+**Action:** Always explicitly add `:focus-visible` styles matching the active theme's accent color (e.g., `var(--accent)`) for all interactive elements to ensure keyboard accessibility.
+>>>>>>> REPLACE

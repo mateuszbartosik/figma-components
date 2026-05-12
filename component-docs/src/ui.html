@@ -6,6 +6,11 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     :root {
       --bg: #ffffff;
       --bg-secondary: #f5f5f5;
@@ -21,6 +26,11 @@
       --success: #1a9e5c;
       --radius: 8px;
       --radius-sm: 5px;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     body {
@@ -176,6 +186,13 @@
     .success h2 { font-size: 14px; font-weight: 600; }
     .success p  { font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
     .success .btn-primary { width: auto; padding: 8px 20px; margin-top: 6px; }
+
+    /* ── Accessibility ── */
+    button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
   </style>
 </head>
 <body>
